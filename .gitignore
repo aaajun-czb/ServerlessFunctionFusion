@@ -1,0 +1,5 @@
+# Ignore all .tar files
+*.tar
+
+# Ignore all .jar files
+*.jar
