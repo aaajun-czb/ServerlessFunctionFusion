@@ -1,0 +1,23 @@
+{
+    "workflows": [
+      {
+        "name": "workflow1",
+        "functions": [
+          {
+            "id": "27",
+            "name": "query-orders-for-refresh",
+            "dependencies": [],
+            "async": true,
+            "slo": 10000
+          },
+          {
+            "id": "44",
+            "name": "get-stationid-list-by-name-list",
+            "dependencies": ["27"],
+            "async": false,
+            "slo": -1
+          }
+        ]
+      }
+    ]
+  }

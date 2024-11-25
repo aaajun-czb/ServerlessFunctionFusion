@@ -1,0 +1,13 @@
+# 本地测试：
+curl -X POST "http://localhost:8080/update" \
+    -H "Content-Type: application/json" \
+    -d '{"function23_URI": "localhost:8090"}'
+
+curl "http://localhost:8080/orderId/d3c91694-d5b8-424c-9974-e14c89226e49"
+
+# docker测试：
+curl -X POST "http://172.17.0.2:8080/update" \
+    -H "Content-Type: application/json" \
+    -d '{"function23_URI": "172.17.0.3:8080"}'
+
+curl "http://172.17.0.2:8080/orderId/d3c91694-d5b8-424c-9974-e14c89226e49" 

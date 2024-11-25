@@ -1,0 +1,26 @@
+# 01本地测试：
+curl -X POST "http://localhost:8080/update" \
+    -H "Content-Type: application/json" \
+    -d '{"function08_URI":"localhost:8081","function03_URI":"localhost:8086","function07_URI":"localhost:8088"}'
+
+curl -X POST "http://localhost:8080/" \
+    -H "Content-Type: application/json" \
+    -d '{"startingPlace":"Shang Hai","endPlace":"Su Zhou","departureTime":"2024-07-02"}'
+
+# 本地全部更新：
+
+curl -X POST "http://localhost:8081/update" \
+    -H "Content-Type: application/json" \
+    -d '{"function09_URI": "localhost:8082", "function10_URI": "localhost:8083", "function11_URI": "localhost:8084", "function12_URI": "localhost:8085"}'
+
+curl -X POST "http://localhost:8082/update" \
+    -H "Content-Type: application/json" \
+    -d '{"function03_URI": "localhost:8086"}'
+    
+curl -X POST "http://localhost:8084/update" \
+    -H "Content-Type: application/json" \
+    -d '{"function04_URI": "localhost:8087"}'
+    
+curl -X POST "http://localhost:8080/update" \
+    -H "Content-Type: application/json" \
+    -d '{"function08_URI":"localhost:8081","function03_URI":"localhost:8086","function07_URI":"localhost:8088"}'
