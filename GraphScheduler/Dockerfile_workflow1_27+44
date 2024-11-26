@@ -2,5 +2,3 @@ FROM openjdk:8-jre-slim
 WORKDIR /app
 COPY ./NestedWorkflow/workflow1/27/query-orders-for-refresh/build/libs/query-orders-for-refresh.jar /app/query-orders-for-refresh.jar
 COPY ./NestedWorkflow/workflow1/44/get-stationid-list-by-name-list/build/libs/get-stationid-list-by-name-list.jar /app/get-stationid-list-by-name-list.jar
-# Run the JAR file
-ENTRYPOINT ["java", "-jar", "query-orders-for-refresh.jar"]

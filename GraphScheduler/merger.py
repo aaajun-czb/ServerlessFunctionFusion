@@ -17,10 +17,6 @@ class DockerImageBuilder:
             jar_name = os.path.basename(jar_path)
             dockerfile_content.append(f"COPY {jar_path} {self.working_dir}/{jar_name}")
 
-        entrypoint_jar = os.path.basename(jar_paths[function_ids[0]])
-        dockerfile_content.append(f"# Run the JAR file")
-        dockerfile_content.append(f'ENTRYPOINT ["java", "-jar", "{entrypoint_jar}"]')
-
         dockerfile_path = f"Dockerfile_{workflow_name}_{'+'.join(map(str, function_ids))}"
         with open(dockerfile_path, 'w') as dockerfile:
             dockerfile.write("\n".join(dockerfile_content))

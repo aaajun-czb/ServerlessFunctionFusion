@@ -43,7 +43,10 @@ def invoke_workflow_entry(entry_function_id, num_calls=50):
     clear_logs_url = "http://127.0.0.1:5000/clear_logs"
     all_logs = {}
     for _ in range(num_calls):
-        response = requests.post(url, json={"container_name": str(entry_function_id)})
+        response = requests.post(url, json={
+            "container_name": str(entry_function_id),
+            "jar_name": "query-orders-for-refresh.jar"
+            })
         if response.status_code == 200:
             # 获取最新的日志信息
             log_response = requests.get(log_url)

@@ -32,7 +32,9 @@ public class Proxy {
         Handler handler = new Handler();
 
         // 模拟调用 handle 方法
-        List<String> idList = Arrays.asList("nanjing", "shanghaihongqiao", "shanghai", "beijing", "shanghai", "beijing");
+        // List<String> idList = Arrays.asList("nanjing", "shanghaihongqiao", "shanghai", "beijing", "shanghai", "beijing");
+        // 解析命令行参数
+        List<String> idList = Arrays.asList(args);
         mResponse response = handler.handle(idList);
 
         // 输出响应结果

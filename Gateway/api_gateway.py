@@ -8,12 +8,13 @@ container_manager = ContainerManager()
 def invoke_container():
     data = request.json
     container_name = data.get('container_name')
+    jar_name = data.get('jar_name')
     input_data = data.get('data')
     if not container_name:
         return jsonify({"error": "container_name is required"}), 400
     try:
         # 运行容器并获取输出
-        output = container_manager.run_container(container_name, input_data)
+        output = container_manager.run_container(container_name, jar_name, input_data)
         return jsonify(output)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

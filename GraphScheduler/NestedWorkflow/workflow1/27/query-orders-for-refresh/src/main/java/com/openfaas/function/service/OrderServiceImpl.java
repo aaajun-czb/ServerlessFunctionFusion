@@ -101,7 +101,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Map<String, Object> stationResponse = queryForStationId(stationIds);
-        System.out.println(stationResponse);
+        // System.out.println(stationResponse);
         List<String> names = (List<String>) stationResponse.get("data");
         for (int i = 0; i < result.size(); i++) {
             result.get(i).setFrom(names.get(i * 2));
@@ -187,7 +187,7 @@ public class OrderServiceImpl implements OrderService {
         try {
             String json = mapper.writeValueAsString(ids);
 
-            String requestBody = "{\"container_name\": \"44\", \"data\": " + json + "}";
+            String requestBody = "{\"container_name\": \"44\", \"jar_name\": \"get-stationid-list-by-name-list.jar\",\"data\": " + json + "}";
 
             RequestBody body = RequestBody.create(
                     MediaType.parse("application/json"), requestBody);

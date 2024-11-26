@@ -41,8 +41,8 @@ sudo /home/chenzebin/anaconda3/envs/chatglm/bin/python3 api_gateway.py
 
 手动使用curl测试网关功能。
 ```bash
-curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "get-stationid-list-by-name-list"}'
-curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "query-orders-for-refresh"}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "44", "jar_name": "get-stationid-list-by-name-list.jar", "data": ["nanjing", "shanghaihongqiao", "shanghai", "beijing", "shanghai", "beijing"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "27", "jar_name": "query-orders-for-refresh.jar"}'
 ```
 
 ## 图调度器

@@ -33,7 +33,7 @@ class ContainerManager:
         """设置容器镜像的内存设置"""
         self._image_memory_settings[image_name] = memory_limit
 
-    def run_container(self, image_name, input_data):
+    def run_container(self, image_name, jar_name, input_data):
         try:
             host_ip = self.get_host_ip()
             mongo_ip = self.get_container_ip('some-mongo')
@@ -41,10 +41,15 @@ class ContainerManager:
             if image_name not in self._image_memory_settings:
                 self._image_memory_settings[image_name] = 512
             memory_limit = self._image_memory_settings.get(image_name, 512)
+            # 构建命令行参数
+            command = ["java", "-jar", jar_name]
+            if input_data:
+                command.extend(input_data)
 
             # 运行容器并添加主机IP到extra_hosts
             container = self.client.containers.run(
                 image_name, 
+                command=command,  # 使用构建的命令行参数
                 detach=True, 
                 network_mode='host',
                 extra_hosts={
