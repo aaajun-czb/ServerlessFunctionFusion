@@ -140,10 +140,25 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private String runJarAndGetOutput(File jarFile, List<String> ids) throws IOException, InterruptedException {
+    private static String buildCommand(String jarFilePath, String json) throws Exception {
+        // 使用 Jackson 将 JSON 字符串解析为 List<String>
+        ObjectMapper mapper = new ObjectMapper();
+        List<String> idList = mapper.readValue(json, List.class);
+
+        // 构建命令行参数
+        StringBuilder commandBuilder = new StringBuilder("java -jar ").append(jarFilePath);
+        for (String id : idList) {
+            commandBuilder.append(" ").append(id);
+        }
+
+        return commandBuilder.toString();
+    }
+
+    private String runJarAndGetOutput(File jarFile, List<String> ids) throws Exception {
         // 构建命令行参数
         String json = mapper.writeValueAsString(ids);
-        String command = String.format("java -jar %s %s", jarFile.getAbsolutePath(), json);
+        String command = buildCommand(jarFile.getAbsolutePath(), json);
+        // System.out.println(command);
 
         // 运行命令并获取输出
         Process process = Runtime.getRuntime().exec(command);

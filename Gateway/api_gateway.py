@@ -10,6 +10,7 @@ def invoke_container():
     container_name = data.get('container_name')
     jar_name = data.get('jar_name')
     input_data = data.get('data')
+    print(f"container_name:{container_name}")
     if not container_name:
         return jsonify({"error": "container_name is required"}), 400
     try:

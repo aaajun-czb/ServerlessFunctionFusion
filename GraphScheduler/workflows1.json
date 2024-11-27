@@ -5,14 +5,14 @@
         "functions": [
           {
             "id": "27",
-            "name": "query-orders-for-refresh",
+            "name": "27",
             "dependencies": [],
             "async": true,
             "slo": 10000
           },
           {
             "id": "44",
-            "name": "get-stationid-list-by-name-list",
+            "name": "44",
             "dependencies": ["27"],
             "async": false,
             "slo": -1
