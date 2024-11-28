@@ -63,11 +63,12 @@ def invoke_workflow_entry(entry_function_id, num_calls=50, filename="default.pkl
     for _ in range(num_calls):
         response = requests.post(url, json={
             "container_name": str(entry_function_id),
-            "jar_name": "query-orders-for-refresh.jar"
+            # "jar_name": "query-orders-for-refresh.jar"
+            "jar_name": "calculate-refund.jar"
             })
         if response.status_code == 200:
             # 获取最新的日志信息，等待个几秒，防止容器信息还没完全记录导致缺少log
-            time.sleep(10)
+            time.sleep(5)
             log_response = requests.get(log_url)
             if log_response.status_code == 200:
                 logs = log_response.json()
@@ -209,7 +210,7 @@ def gradient_descent_optimization_for_dag(
             for node_id in dag.get_all_nodes():
                 dag.nodes[node_id]['memory'] = containers_memory_left[node_id]
             set_memory_limit_for_all_functions(dag)
-            all_logs = invoke_workflow_entry(entry_function_id, num_calls, f"workflow1_merged_left_{iteration}.pkl")
+            all_logs = invoke_workflow_entry(entry_function_id, num_calls, f"workflow2_merged_left_{iteration}.pkl")
             update_dag_with_logs(dag, all_logs)
             for node_id in dag.get_all_nodes():
                 memory = dag.nodes[node_id]['memory']
@@ -243,7 +244,7 @@ def gradient_descent_optimization_for_dag(
             for node_id in dag.get_all_nodes():
                 dag.nodes[node_id]['memory'] = containers_memory_right[node_id]
             set_memory_limit_for_all_functions(dag)
-            all_logs = invoke_workflow_entry(entry_function_id, num_calls, f"workflow1_merged_right_{iteration}.pkl")
+            all_logs = invoke_workflow_entry(entry_function_id, num_calls, f"workflow2_merged_right_{iteration}.pkl")
             update_dag_with_logs(dag, all_logs)
             for node_id in dag.get_all_nodes():
                 memory = dag.nodes[node_id]['memory']
@@ -321,14 +322,14 @@ def gradient_descent_optimization_for_dag(
 # sudo /home/chenzebin/anaconda3/envs/chatglm/bin/python3 main.py
 if __name__ == '__main__':
     # 读取JSON文件创建DAG对象
-    with open('./workflows1.json', 'r') as f:
+    with open('./workflows2.json', 'r') as f:
         json_data = json.load(f)
     dag = create_dag_from_json(json_data)
     # 获取工作流的入口函数ID
     entry_function_id = get_entry_function_id(dag)
     # 初始化调用入口函数num_calls次
     set_memory_limit_for_all_functions(dag)
-    all_logs = invoke_workflow_entry(entry_function_id, 1, "workflow1_origin.pkl")
+    all_logs = invoke_workflow_entry(entry_function_id, 20, "workflow2_origin.pkl")
     # 将日志信息加到DAG对应的函数下面
     update_dag_with_logs(dag, all_logs)
     # 找出同步调用时间最长的函数和调用它的函数
@@ -338,9 +339,11 @@ if __name__ == '__main__':
     # 融合这两个函数的镜像
     jar_paths = {
         '27': "./NestedWorkflow/workflow1/27/query-orders-for-refresh/build/libs/query-orders-for-refresh.jar",
-        '44': "./NestedWorkflow/workflow1/44/get-stationid-list-by-name-list/build/libs/get-stationid-list-by-name-list.jar"
+        '44': "./NestedWorkflow/workflow1/44/get-stationid-list-by-name-list/build/libs/get-stationid-list-by-name-list.jar",
+        '23': "./NestedWorkflow/workflow2/23/get-order-by-id/build/libs/get-order-by-id.jar",
+        '30': "./NestedWorkflow/workflow2/30/calculate-refund/build/libs/calculate-refund.jar"
     }
-    merged_image_name = merge_images(merged_functions, "workflow1", jar_paths)
+    merged_image_name = merge_images(merged_functions, "workflow2", jar_paths)
     # 创建融合后的DAG
     merged_dag = create_merged_dag(dag, merged_functions, merged_image_name)
     # print(merged_dag.nodes)
@@ -348,10 +351,10 @@ if __name__ == '__main__':
     entry_function_id = get_entry_function_id(merged_dag)
     # 调用入口函数num_calls次
     set_memory_limit_for_all_functions(merged_dag)
-    all_logs = invoke_workflow_entry(entry_function_id, 1, "workflow1_merged.pkl")
+    all_logs = invoke_workflow_entry(entry_function_id, 20, "workflow2_merged.pkl")
     # 将日志信息加到DAG对应的函数下面
     update_dag_with_logs(merged_dag, all_logs)
     
     # 对融合后的DAG内存做出修改
     gradient_descent_optimization_for_dag(merged_dag, entry_function_id, memory_step=128, 
-    max_iterations=5, threshold_count=1, slo_runtime=None, num_calls=1)
+    max_iterations=5, threshold_count=1, slo_runtime=None, num_calls=20)

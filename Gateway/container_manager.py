@@ -3,6 +3,7 @@ import pickle
 import docker
 import subprocess
 import re
+import json
 from dateutil import parser
 
 class ContainerManager:
@@ -95,11 +96,11 @@ class ContainerManager:
             # 解析输出并提取有用的信息
             response_status = re.search(r'Response Status: (\d+)', output)
             response_message = re.search(r'Response Message: (.+)', output)
-            response_data = re.search(r'Response Data: \[(.+)\]', output)
+            response_data = extract_response_data(output)
             result = {
                 "status": int(response_status.group(1)) if response_status else None,
                 "message": response_message.group(1) if response_message else None,
-                "data": response_data.group(1).split(",") if response_data else None
+                "data": response_data
             }
             return result
 
@@ -134,3 +135,17 @@ class ContainerManager:
     def clear_logs(self):
         """清空日志"""
         self._container_logs = {}
+        
+def extract_response_data(output):
+    # 使用正则表达式匹配 Response Data: 后面的内容，直到换行符
+    response_data_match = re.search(r'Response Data: (.*?)\n', output, re.DOTALL)
+    if response_data_match:
+        response_data_str = response_data_match.group(1).strip()
+        try:
+            # 尝试将字符串解析为 JSON 对象
+            response_data = json.loads(response_data_str)
+            return response_data
+        except json.JSONDecodeError:
+            # 如果解析失败，返回原始字符串
+            return response_data_str
+    return None
