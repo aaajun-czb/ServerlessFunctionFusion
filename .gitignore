@@ -3,3 +3,6 @@
 
 # Ignore all .jar files
 *.jar
+
+# Ignore all .pkl files
+*.pkl
