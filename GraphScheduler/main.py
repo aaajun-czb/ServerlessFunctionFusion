@@ -361,7 +361,7 @@ if __name__ == '__main__':
         entry_function_id = get_entry_function_id(dag)
         # 初始化调用入口函数num_calls次
         set_memory_limit_for_all_functions(dag)
-        all_logs = invoke_workflow_entry(entry_function_id, 1, f"workflow3_origin_{count}.pkl")
+        all_logs = invoke_workflow_entry(entry_function_id, 20, f"workflow3_origin_{count}.pkl")
         # 将日志信息加到DAG对应的函数下面
         update_dag_with_logs(dag, all_logs)
         # 找出同步调用时间最长的函数和调用它的函数
@@ -379,7 +379,7 @@ if __name__ == '__main__':
         entry_function_id = get_entry_function_id(merged_dag)
         # 调用入口函数num_calls次
         set_memory_limit_for_all_functions(merged_dag)
-        all_logs = invoke_workflow_entry(entry_function_id, 1, f"workflow3_merged_{count}.pkl")
+        all_logs = invoke_workflow_entry(entry_function_id, 20, f"workflow3_merged_{count}.pkl")
         # 将日志信息加到DAG对应的函数下面
         update_dag_with_logs(merged_dag, all_logs)
         # 比较端到端Cost是否下降
@@ -401,4 +401,4 @@ if __name__ == '__main__':
     
     # 对融合后的DAG内存做出修改
     gradient_descent_optimization_for_dag(dag, entry_function_id, memory_step=128, 
-    max_iterations=5, threshold_count=1, slo_runtime=None, num_calls=1)
+    max_iterations=5, threshold_count=1, slo_runtime=None, num_calls=20)
