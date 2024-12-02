@@ -1,0 +1,6 @@
+FROM openjdk:8-jre-slim
+WORKDIR /app
+COPY ./NestedWorkflow/workflow3/22/cancel-ticket/build/libs/cancel-ticket.jar /app/cancel-ticket.jar
+COPY ./NestedWorkflow/workflow3/23/get-order-by-id/build/libs/get-order-by-id.jar /app/get-order-by-id.jar
+COPY ./NestedWorkflow/workflow3/29/save-order-info/build/libs/save-order-info.jar /app/save-order-info.jar
+COPY ./NestedWorkflow/workflow3/28/drawback/build/libs/drawback.jar /app/drawback.jar

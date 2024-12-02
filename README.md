@@ -56,6 +56,26 @@ curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d
 curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "30_23", "jar_name": "calculate-refund.jar"}'
 ```
 
+### workflow3修改
+同理。
+```bash
+chmod a+x ./gradlew
+dos2unix ./gradlew
+./gradlew clean build
+sudo docker build -t 28 .
+sudo docker build -t 29 .
+sudo docker build -t 22 .
+sudo docker build -t 22_23_29_28 -f Dockerfile_workflow3_22+23+29+28 .
+```
+
+手动使用curl测试网关功能。
+```bash
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "28", "jar_name": "drawback.jar", "data": ["test", "4396"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "29", "jar_name": "save-order-info.jar"}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "22", "jar_name": "cancel-ticket.jar", "data": ["d3c91694-d5b8-424c-9974-e14c89226e49", "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "22_23_29_28", "jar_name": "cancel-ticket.jar", "data": ["d3c91694-d5b8-424c-9974-e14c89226e49", "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"]}'
+```
+
 ## 网关+性能监控器
 ### 启动
 在Gateway目录下运行网关服务器

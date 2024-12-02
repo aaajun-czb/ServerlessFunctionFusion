@@ -65,7 +65,7 @@ class ContainerManager:
             container.wait()  # 等待容器完成
             # 获取容器的输出
             output = container.logs().decode('utf-8')
-            # print(output)
+            print(output)
             # 获取容器的启动和停止时间
             container.reload()
             start_time_str = container.attrs['State']['StartedAt']
