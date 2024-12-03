@@ -76,6 +76,40 @@ curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d
 curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "22_23_29_28", "jar_name": "cancel-ticket.jar", "data": ["d3c91694-d5b8-424c-9974-e14c89226e49", "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"]}'
 ```
 
+### workflow4修改
+同理。
+```bash
+chmod a+x ./gradlew
+dos2unix ./gradlew
+./gradlew clean build
+sudo docker build -t 21 .
+sudo docker build -t 14 .
+sudo docker build -t 13 .
+sudo docker build -t 13_14_21 -f Dockerfile_workflow4_13+14+21 .
+```
+
+手动使用curl测试网关功能。
+```bash
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "21", "jar_name": "check-security-about-order.jar", "data": ["4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f", "2023-01-01"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "14", "jar_name": "check-security.jar", "data": ["4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "13", "jar_name": "preserve-ticket.jar", "data": ["4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "13_14_21", "jar_name": "preserve-ticket.jar", "data": ["4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"]}'
+```
+
+### workflow4修改
+同理。
+```bash
+chmod a+x ./gradlew
+dos2unix ./gradlew
+./gradlew clean build
+sudo docker build -t 03 .
+```
+
+手动使用curl测试网关功能。
+```bash
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "03", "jar_name": "get-route-by-routeid.jar", "data": ["f3d4d4ef-693b-4456-8eed-59c0d717dd08"]}'
+```
+
 ## 网关+性能监控器
 ### 启动
 在Gateway目录下运行网关服务器

@@ -1,0 +1,30 @@
+{
+    "workflows": [
+      {
+        "name": "workflow4",
+        "functions": [
+          {
+            "id": "13",
+            "name": "13",
+            "dependencies": [],
+            "async": true,
+            "slo": 10000
+          },
+          {
+            "id": "14",
+            "name": "14",
+            "dependencies": ["13"],
+            "async": false,
+            "slo": -1
+          },
+          {
+            "id": "21",
+            "name": "21",
+            "dependencies": ["14"],
+            "async": false,
+            "slo": -1
+          }
+        ]
+      }
+    ]
+  }

@@ -1,4 +1,0 @@
-FROM openjdk:8-jre-slim
-WORKDIR /app
-COPY ./NestedWorkflow/workflow2/30/calculate-refund/build/libs/calculate-refund.jar /app/calculate-refund.jar
-COPY ./NestedWorkflow/workflow2/23/get-order-by-id/build/libs/get-order-by-id.jar /app/get-order-by-id.jar

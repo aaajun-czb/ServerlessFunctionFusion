@@ -64,8 +64,8 @@ def invoke_workflow_entry(entry_function_id, num_calls=50, filename="default.pkl
     for _ in range(num_calls):
         response = requests.post(url, json={
             "container_name": str(entry_function_id),
-            "jar_name": "cancel-ticket.jar",
-            "data": ["d3c91694-d5b8-424c-9974-e14c89226e49", "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"]
+            "jar_name": "preserve-ticket.jar",
+            "data": ["4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"]
             })
         if response.status_code == 200:
             # 获取最新的日志信息，等待个几秒，防止容器信息还没完全记录导致缺少log
@@ -222,7 +222,7 @@ def gradient_descent_optimization_for_dag(
             for node_id in dag.get_all_nodes():
                 dag.nodes[node_id]['memory'] = containers_memory_left[node_id]
             set_memory_limit_for_all_functions(dag)
-            all_logs = invoke_workflow_entry(entry_function_id, num_calls, f"workflow3_merged_left_{iteration}.pkl")
+            all_logs = invoke_workflow_entry(entry_function_id, num_calls, f"workflow4_merged_left_{iteration}.pkl")
             update_dag_with_logs(dag, all_logs)
             for node_id in dag.get_all_nodes():
                 memory = dag.nodes[node_id]['memory']
@@ -256,7 +256,7 @@ def gradient_descent_optimization_for_dag(
             for node_id in dag.get_all_nodes():
                 dag.nodes[node_id]['memory'] = containers_memory_right[node_id]
             set_memory_limit_for_all_functions(dag)
-            all_logs = invoke_workflow_entry(entry_function_id, num_calls, f"workflow3_merged_right_{iteration}.pkl")
+            all_logs = invoke_workflow_entry(entry_function_id, num_calls, f"workflow4_merged_right_{iteration}.pkl")
             update_dag_with_logs(dag, all_logs)
             for node_id in dag.get_all_nodes():
                 memory = dag.nodes[node_id]['memory']
@@ -333,16 +333,15 @@ def gradient_descent_optimization_for_dag(
 
 # 融合镜像包路径
 jar_paths = {
-    '23': "./NestedWorkflow/workflow3/23/get-order-by-id/build/libs/get-order-by-id.jar",
-    '22': "./NestedWorkflow/workflow3/22/cancel-ticket/build/libs/cancel-ticket.jar",
-    '28': "./NestedWorkflow/workflow3/28/drawback/build/libs/drawback.jar",
-    '29': "./NestedWorkflow/workflow3/29/save-order-info/build/libs/save-order-info.jar"
+    '13': "./NestedWorkflow/workflow4/13/preserve-ticket/build/libs/preserve-ticket.jar",
+    '14': "./NestedWorkflow/workflow4/14/check-security/build/libs/check-security.jar",
+    '21': "./NestedWorkflow/workflow4/21/check-security-about-order/build/libs/check-security-about-order.jar"
 }
 
 # sudo /home/chenzebin/anaconda3/envs/chatglm/bin/python3 main.py
 if __name__ == '__main__':
     # 读取JSON文件创建DAG对象
-    with open('./workflows3.json', 'r') as f:
+    with open('./workflows4.json', 'r') as f:
         json_data = json.load(f)
     dag = create_dag_from_json(json_data)
     '''循环融合直到所有函数都尝试过融合'''
@@ -361,7 +360,7 @@ if __name__ == '__main__':
         entry_function_id = get_entry_function_id(dag)
         # 初始化调用入口函数num_calls次
         set_memory_limit_for_all_functions(dag)
-        all_logs = invoke_workflow_entry(entry_function_id, 20, f"workflow3_origin_{count}.pkl")
+        all_logs = invoke_workflow_entry(entry_function_id, 20, f"workflow4_origin_{count}.pkl")
         # 将日志信息加到DAG对应的函数下面
         update_dag_with_logs(dag, all_logs)
         # 找出同步调用时间最长的函数和调用它的函数
@@ -370,7 +369,7 @@ if __name__ == '__main__':
         merged_functions.extend(convert_function_string(calling_function))
         merged_functions.extend(convert_function_string(longest_sync_function))
         # 融合镜像(需要原始函数的列表)
-        merged_image_name = merge_images(merged_functions, "workflow3", jar_paths)
+        merged_image_name = merge_images(merged_functions, "workflow4", jar_paths)
         # 创建融合后的DAG(提供DAG的函数的列表)
         merged_functions = [calling_function, longest_sync_function]
         merged_dag = create_merged_dag(dag, merged_functions, merged_image_name)
@@ -379,7 +378,7 @@ if __name__ == '__main__':
         entry_function_id = get_entry_function_id(merged_dag)
         # 调用入口函数num_calls次
         set_memory_limit_for_all_functions(merged_dag)
-        all_logs = invoke_workflow_entry(entry_function_id, 20, f"workflow3_merged_{count}.pkl")
+        all_logs = invoke_workflow_entry(entry_function_id, 20, f"workflow4_merged_{count}.pkl")
         # 将日志信息加到DAG对应的函数下面
         update_dag_with_logs(merged_dag, all_logs)
         # 比较端到端Cost是否下降
