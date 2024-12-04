@@ -1,0 +1,6 @@
+# 08本地测试：
+curl -X POST "http://localhost:8081/update" \
+    -H "Content-Type: application/json" \
+    -d '{"function09_URI": "localhost:8082", "function10_URI": "localhost:8083", "function11_URI": "localhost:8084", "function12_URI": "localhost:8085"}'
+
+

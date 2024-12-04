@@ -96,18 +96,36 @@ curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d
 curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "13_14_21", "jar_name": "preserve-ticket.jar", "data": ["4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"]}'
 ```
 
-### workflow4修改
+### workflow5修改
 同理。
 ```bash
 chmod a+x ./gradlew
 dos2unix ./gradlew
 ./gradlew clean build
 sudo docker build -t 03 .
+sudo docker build -t 04 .
+sudo docker build -t 07 .
+sudo docker build -t 09 .
+sudo docker build -t 10 .
+sudo docker build -t 11 .
+sudo docker build -t 12 .
+sudo docker build -t 08 .
+sudo docker build -t 01 .
+sudo docker build -t 01_03_04_07_08_09_10_11_12 -f Dockerfile_workflow5_01+03+04+07+08+09+10+11+12 .
 ```
 
 手动使用curl测试网关功能。
 ```bash
 curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "03", "jar_name": "get-route-by-routeid.jar", "data": ["f3d4d4ef-693b-4456-8eed-59c0d717dd08"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "04", "jar_name": "get-traintype-by-traintypeid.jar", "data": ["GaoTieOne"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "07", "jar_name": "query-for-station-id-by-station-name.jar", "data": ["Su Zhou"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "09", "jar_name": "get-route-by-tripid.jar", "data": ["G1237"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "10", "jar_name": "get-sold-tickets.jar", "data": ["2017-07-28 16:00:00", "G1237", "nanjing", "shanghaihongqiao", "2"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "11", "jar_name": "get-traintype-by-tripid.jar", "data": ["G1237"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "12", "jar_name": "query-config-entity-by-config-name.jar", "data": ["DirectTicketAllocationProportion"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "08", "jar_name": "get-left-ticket-of-interval.jar", "data": ["2017-07-28 16:00:00", "G1237", "nanjing", "shanghaihongqiao", "2"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "01", "jar_name": "get-left-trip-tickets.jar", "data": ["Shang Hai", "Su Zhou", "2024-12-15 00:00:00"]}'
+curl -X POST http://localhost:5000/invoke -H "Content-Type: application/json" -d '{"container_name": "01_03_04_07_08_09_10_11_12", "jar_name": "get-left-trip-tickets.jar", "data": ["Shang Hai", "Su Zhou", "2024-12-15 00:00:00"]}'
 ```
 
 ## 网关+性能监控器

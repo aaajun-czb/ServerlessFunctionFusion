@@ -1,5 +1,0 @@
-# 09本地测试：
-curl -X POST "http://localhost:8082/update" \
-    -H "Content-Type: application/json" \
-    -d '{"function03_URI": "localhost:8086"}'
-
