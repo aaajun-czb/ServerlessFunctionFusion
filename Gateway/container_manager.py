@@ -14,6 +14,8 @@ class ContainerManager:
         self._container_logs = {}
         # 私有变量，记录每个容器镜像的内存设置
         self._image_memory_settings = {}
+        # 新增字典用于存储环境变量
+        self._environment_variables = {}
 
     def get_host_ip(self):
         # 获取主机的IP地址
@@ -34,7 +36,11 @@ class ContainerManager:
         """设置容器镜像的内存设置"""
         self._image_memory_settings[image_name] = memory_limit
 
-    def run_container(self, image_name, jar_name, input_data):
+    def set_environment_variable(self, key, value):
+        """设置环境变量"""
+        self._environment_variables[key] = value
+
+    def run_container(self, image_name, jar_name, input_data, calling_container):
         try:
             host_ip = self.get_host_ip()
             mongo_ip = self.get_container_ip('some-mongo')
@@ -46,7 +52,11 @@ class ContainerManager:
             command = ["java", "-jar", jar_name]
             if input_data:
                 command.extend(input_data)
-
+            # 设置额外的环境变量
+            environment = {
+                "CALLING_CONTAINER": image_name,
+                **self._environment_variables  # 将环境变量传递给容器
+            }
             # 运行容器并添加主机IP到extra_hosts
             container = self.client.containers.run(
                 image_name, 
@@ -57,6 +67,7 @@ class ContainerManager:
                     'host.docker.internal': host_ip,
                     'some-mongo': mongo_ip
                 },
+                environment=environment,  # 传递环境变量
                 cpu_quota=int(memory_limit/1024 * 100000),
                 cpu_period=100000,
                 mem_limit=f"{memory_limit}m",
@@ -86,7 +97,8 @@ class ContainerManager:
                 "memory_limit": memory_limit,
                 "cold_start_time": cold_start_time,
                 "execution_time": execution_time,
-                "total_time": total_time
+                "total_time": total_time,
+                "calling_container": calling_container  # 记录 calling_container
             }
             # 将日志信息添加到对应 container_name 的列表中
             if image_name not in self._container_logs:
@@ -111,13 +123,17 @@ class ContainerManager:
         except Exception as e:
             raise Exception(f"Unexpected error: {str(e)}")
 
-    def get_container_logs(self):
+    def get_lastest_container_logs(self):
         """获取每个容器的最后一次调用的容器信息"""
         latest_logs = {}
         for container_name, logs in self._container_logs.items():
             if logs:
                 latest_logs[container_name] = logs[-1]
         return latest_logs
+    
+    def get_all_container_logs(self):
+        """获取每个容器的调用信息"""
+        return self._container_logs
 
     def get_image_memory_settings(self):
         """获取每个容器镜像的内存设置"""

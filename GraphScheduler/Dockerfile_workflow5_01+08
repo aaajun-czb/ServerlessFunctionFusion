@@ -1,0 +1,4 @@
+FROM openjdk:8-jre-slim
+WORKDIR /app
+COPY ./NestedWorkflow/workflow5/01/get-left-trip-tickets/build/libs/get-left-trip-tickets.jar /app/get-left-trip-tickets.jar
+COPY ./NestedWorkflow/workflow5/08/get-left-ticket-of-interval/build/libs/get-left-ticket-of-interval.jar /app/get-left-ticket-of-interval.jar

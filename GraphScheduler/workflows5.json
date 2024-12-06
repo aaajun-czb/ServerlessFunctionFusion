@@ -1,0 +1,72 @@
+{
+    "workflows": [
+      {
+        "name": "workflow5",
+        "functions": [
+          {
+            "id": "01",
+            "name": "01",
+            "dependencies": [],
+            "async": true,
+            "slo": 30000
+          },
+          {
+            "id": "08",
+            "name": "08",
+            "dependencies": ["01"],
+            "async": false,
+            "slo": -1
+          },
+          {
+            "id": "09",
+            "name": "09",
+            "dependencies": ["08"],
+            "async": false,
+            "slo": -1
+          },
+          {
+            "id": "10",
+            "name": "10",
+            "dependencies": ["08"],
+            "async": false,
+            "slo": -1
+          },
+          {
+            "id": "11",
+            "name": "11",
+            "dependencies": ["08"],
+            "async": false,
+            "slo": -1
+          },
+          {
+            "id": "12",
+            "name": "12",
+            "dependencies": ["08"],
+            "async": false,
+            "slo": -1
+          },
+          {
+            "id": "03",
+            "name": "03",
+            "dependencies": ["01", "09"],
+            "async": false,
+            "slo": -1
+          },
+          {
+            "id": "04",
+            "name": "04",
+            "dependencies": ["11"],
+            "async": false,
+            "slo": -1
+          },
+          {
+            "id": "07",
+            "name": "07",
+            "dependencies": ["01"],
+            "async": false,
+            "slo": -1
+          }
+        ]
+      }
+    ]
+  }

@@ -33,9 +33,9 @@ public class TravelServiceImpl implements TravelService {
     private final OkHttpClient client;
     public TravelServiceImpl() {
         client = new OkHttpClient.Builder()
-                .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .connectTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
                 .build();
     }
 
@@ -139,7 +139,10 @@ public class TravelServiceImpl implements TravelService {
             List<String> dataList = new ArrayList<>();
             dataList.add(stationName);
             String json = mapper.writeValueAsString(dataList);
-            String requestBody = "{\"container_name\": \"07\", \"jar_name\": \"query-for-station-id-by-station-name.jar\",\"data\": " + json + "}";
+            // 读取环境变量 CALLING_CONTAINER
+            String callingContainer = System.getenv("CALLING_CONTAINER");
+            String container_name = System.getenv("07");
+            String requestBody = "{\"container_name\": \"" + container_name + "\", \"jar_name\": \"query-for-station-id-by-station-name.jar\", \"calling_container\": \"" + callingContainer + "\" , \"data\": " + json + "}";
             RequestBody body = RequestBody.create(
                     MediaType.parse("application/json"), requestBody);
             Request request = new Request.Builder()
@@ -178,7 +181,10 @@ public class TravelServiceImpl implements TravelService {
             List<String> dataList = new ArrayList<>();
             dataList.add(routeId);
             String json = mapper.writeValueAsString(dataList);
-            String requestBody = "{\"container_name\": \"03\", \"jar_name\": \"get-route-by-routeid.jar\",\"data\": " + json + "}";
+            // 读取环境变量 CALLING_CONTAINER
+            String callingContainer = System.getenv("CALLING_CONTAINER");
+            String container_name = System.getenv("03");
+            String requestBody = "{\"container_name\": \"" + container_name + "\", \"jar_name\": \"get-route-by-routeid.jar\", \"calling_container\": \"" + callingContainer + "\" , \"data\": " + json + "}";
             RequestBody body = RequestBody.create(
                     MediaType.parse("application/json"), requestBody);
             Request request = new Request.Builder()
@@ -239,7 +245,10 @@ public class TravelServiceImpl implements TravelService {
             dataList.add(seatRequest.getDestStation());
             dataList.add(String.valueOf(seatRequest.getSeatType()));
             String json = mapper.writeValueAsString(dataList);
-            String requestBody = "{\"container_name\": \"08\", \"jar_name\": \"get-left-ticket-of-interval.jar\",\"data\": " + json + "}";
+            // 读取环境变量 CALLING_CONTAINER
+            String callingContainer = System.getenv("CALLING_CONTAINER");
+            String container_name = System.getenv("08");
+            String requestBody = "{\"container_name\": \"" + container_name + "\", \"jar_name\": \"get-left-ticket-of-interval.jar\", \"calling_container\": \"" + callingContainer + "\" , \"data\": " + json + "}";
             RequestBody body = RequestBody.create(
                     MediaType.parse("application/json"), requestBody);
             Request request = new Request.Builder()
