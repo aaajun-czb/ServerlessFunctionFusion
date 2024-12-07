@@ -138,32 +138,10 @@ sudo /home/chenzebin/anaconda3/envs/chatglm/bin/python3 api_gateway.py
 ## 图调度器
 ### 工作流输入结构
 形如下面，async表示同步异步调用，slo代表到完成该函数时的slo要求。
-```json
-{
-    "workflows": [
-      {
-        "name": "workflow1",
-        "functions": [
-          {
-            "id": 27,
-            "name": "query-orders-for-refresh",
-            "dependencies": [],
-            "async": false,
-            "slo": 10000
-          },
-          {
-            "id": 44,
-            "name": "get-stationid-list-by-name-list",
-            "dependencies": [27],
-            "async": false,
-            "slo": -1
-          }
-        ]
-      }
-    ]
-  }
-```
 
 ### 融合机制
+先调本地jar包，再调网关。
 
 ### 调度器
+贪心融合最长执行时间的两个同步容器。
+内存搜索使用MAFF梯度算法。
