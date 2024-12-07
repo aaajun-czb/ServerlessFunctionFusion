@@ -10,14 +10,12 @@ def invoke_container():
     container_name = data.get('container_name')
     jar_name = data.get('jar_name')
     input_data = data.get('data')
-    calling_container = data.get('calling_container')  # 获取 calling_container 字段
-    print(f"container_name:{container_name}, calling_container:{calling_container}")
+    print(f"container_name:{container_name}")
     if not container_name:
         return jsonify({"error": "container_name is required"}), 400
     try:
         # 运行容器并获取输出
-        output = container_manager.run_container(container_name, jar_name, 
-                                                 input_data, calling_container)
+        output = container_manager.run_container(container_name, jar_name, input_data)
         return jsonify(output)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -32,18 +30,10 @@ def save_logs():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route('/get_all_logs', methods=['GET'])
-def get_all_logs():
+@app.route('/get_logs', methods=['GET'])
+def get_logs():
     try:
-        logs = container_manager.get_all_container_logs()
-        return jsonify(logs)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500    
-    
-@app.route('/get_latest_logs', methods=['GET'])
-def get_latest_logs():
-    try:
-        logs = container_manager.get_lastest_container_logs()
+        logs = container_manager.get_container_logs()
         return jsonify(logs)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -66,19 +56,6 @@ def set_memory_limit():
     try:
         container_manager.set_image_memory_setting(image_name, memory_limit)
         return jsonify({"message": f"Memory limit set for {image_name}: {memory_limit} MB"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/set_environment_variable', methods=['POST'])
-def set_environment_variable():
-    data = request.json
-    key = data.get('key')
-    value = data.get('value')
-    if not key or not value:
-        return jsonify({"error": "key and value are required"}), 400
-    try:
-        container_manager.set_environment_variable(key, value)
-        return jsonify({"message": f"Environment variable {key} set to {value}"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

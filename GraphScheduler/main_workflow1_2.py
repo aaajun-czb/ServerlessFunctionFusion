@@ -8,7 +8,7 @@ class DAG:
     def __init__(self):
         self.graph = defaultdict(list)
         self.nodes = {}
-    def add_node(self, node_id, name, async_flag, slo, memory=128):
+    def add_node(self, node_id, name, async_flag, slo, memory=512):
         self.nodes[node_id] = {
             "name": name,
             "async": async_flag,
@@ -63,8 +63,8 @@ def invoke_workflow_entry(entry_function_id, num_calls=50, filename="default.pkl
     for _ in range(num_calls):
         response = requests.post(url, json={
             "container_name": str(entry_function_id),
-            # "jar_name": "query-orders-for-refresh.jar"
-            "jar_name": "calculate-refund.jar"
+            "jar_name": "query-orders-for-refresh.jar"
+            # "jar_name": "calculate-refund.jar"
             })
         if response.status_code == 200:
             # 获取最新的日志信息，等待个几秒，防止容器信息还没完全记录导致缺少log
@@ -119,14 +119,14 @@ def merge_images(function_ids, workflow_name, jar_paths):
 def create_merged_dag(original_dag, merged_functions, merged_image_name):
     merged_dag = DAG()
     # 添加新的融合函数节点
-    new_momory = original_dag.nodes[merged_functions[0]]["memory"]+original_dag.nodes[merged_functions[1]]["memory"]
-    if new_momory > 1024:
-        new_momory = 1024
+    # new_momory = original_dag.nodes[merged_functions[0]]["memory"]+original_dag.nodes[merged_functions[1]]["memory"]
+    # if new_momory > 1024:
+    #     new_momory = 1024
     merged_dag.add_node(merged_image_name, 
                         merged_image_name, 
                         original_dag.nodes[merged_functions[0]]["async"], 
                         original_dag.nodes[merged_functions[0]]["slo"],
-                        new_momory)
+                        original_dag.nodes[merged_functions[0]]["memory"])
     # 复制原始DAG中的所有节点和边到新的DAG中，并更新依赖关系
     for node_id, node_info in original_dag.nodes.items():
         if node_id not in merged_functions:
@@ -147,10 +147,10 @@ def create_merged_dag(original_dag, merged_functions, merged_image_name):
                 merged_dag.add_edge(dep, node_id)
     return merged_dag
 
-def calculate_cost(container_total_time, container_memory):
+def calculate_cost(container_total_time, container_memory, num_calls):
     factor = 0.00001667
     # Lambda 0.00001667美元/GB-s
-    cost = factor * container_memory/1024 * container_total_time/1000
+    cost = factor * container_memory/1024 * container_total_time/1000 + 0.000002 * num_calls
     return cost
 
 def gradient_descent_optimization_for_dag(
@@ -176,7 +176,7 @@ def gradient_descent_optimization_for_dag(
     containers_runtime = {}
     # 保存初始化成本
     for node_id in dag.get_all_nodes():
-        cost = calculate_cost(dag.nodes[node_id]['total_time'], dag.nodes[node_id]['memory'])
+        cost = calculate_cost(dag.nodes[node_id]['total_time'], dag.nodes[node_id]['memory'], num_calls)
         containers_cost[node_id] = {dag.nodes[node_id]['memory']: cost}
         runtime = dag.nodes[node_id]['total_time']
         containers_runtime[node_id] = {dag.nodes[node_id]['memory']: runtime}
@@ -214,7 +214,7 @@ def gradient_descent_optimization_for_dag(
             update_dag_with_logs(dag, all_logs)
             for node_id in dag.get_all_nodes():
                 memory = dag.nodes[node_id]['memory']
-                containers_cost_left[node_id] = calculate_cost(dag.nodes[node_id]['total_time'], memory)
+                containers_cost_left[node_id] = calculate_cost(dag.nodes[node_id]['total_time'], memory, num_calls)
                 containers_runtime_left[node_id] = dag.nodes[node_id]['total_time']
                 containers_cost[node_id][memory] = containers_cost_left[node_id]
                 containers_runtime[node_id][memory] = containers_runtime_left[node_id]
@@ -248,7 +248,7 @@ def gradient_descent_optimization_for_dag(
             update_dag_with_logs(dag, all_logs)
             for node_id in dag.get_all_nodes():
                 memory = dag.nodes[node_id]['memory']
-                containers_cost_right[node_id] = calculate_cost(dag.nodes[node_id]['total_time'], memory)
+                containers_cost_right[node_id] = calculate_cost(dag.nodes[node_id]['total_time'], memory, num_calls)
                 containers_runtime_right[node_id] = dag.nodes[node_id]['total_time']
                 containers_cost[node_id][memory] = containers_cost_right[node_id]
                 containers_runtime[node_id][memory] = containers_runtime_right[node_id]
@@ -322,14 +322,14 @@ def gradient_descent_optimization_for_dag(
 # sudo /home/chenzebin/anaconda3/envs/chatglm/bin/python3 main.py
 if __name__ == '__main__':
     # 读取JSON文件创建DAG对象
-    with open('./workflows3.json', 'r') as f:
+    with open('./workflows1.json', 'r') as f:
         json_data = json.load(f)
     dag = create_dag_from_json(json_data)
     # 获取工作流的入口函数ID
     entry_function_id = get_entry_function_id(dag)
     # 初始化调用入口函数num_calls次
     set_memory_limit_for_all_functions(dag)
-    all_logs = invoke_workflow_entry(entry_function_id, 20, "workflow2_origin.pkl")
+    all_logs = invoke_workflow_entry(entry_function_id, 20, "workflow1_origin.pkl")
     # 将日志信息加到DAG对应的函数下面
     update_dag_with_logs(dag, all_logs)
     # 找出同步调用时间最长的函数和调用它的函数
@@ -346,7 +346,7 @@ if __name__ == '__main__':
         '28': "./NestedWorkflow/workflow3/28/drawback/build/libs/drawback.jar",
         '29': "./NestedWorkflow/workflow3/29/save-order-info/build/libs/save-order-info.jar"
     }
-    merged_image_name = merge_images(merged_functions, "workflow2", jar_paths)
+    merged_image_name = merge_images(merged_functions, "workflow1", jar_paths)
     # 创建融合后的DAG
     merged_dag = create_merged_dag(dag, merged_functions, merged_image_name)
     # print(merged_dag.nodes)
@@ -354,7 +354,7 @@ if __name__ == '__main__':
     entry_function_id = get_entry_function_id(merged_dag)
     # 调用入口函数num_calls次
     set_memory_limit_for_all_functions(merged_dag)
-    all_logs = invoke_workflow_entry(entry_function_id, 20, "workflow2_merged.pkl")
+    all_logs = invoke_workflow_entry(entry_function_id, 20, "workflow1_merged.pkl")
     # 将日志信息加到DAG对应的函数下面
     update_dag_with_logs(merged_dag, all_logs)
     

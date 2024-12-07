@@ -8,7 +8,7 @@ class DAG:
     def __init__(self):
         self.graph = defaultdict(list)
         self.nodes = {}
-    def add_node(self, node_id, name, async_flag, slo, memory=128):
+    def add_node(self, node_id, name, async_flag, slo, memory=512):
         self.nodes[node_id] = {
             "name": name,
             "async": async_flag,
@@ -126,14 +126,14 @@ def merge_images(function_ids, workflow_name, jar_paths):
 def create_merged_dag(original_dag, merged_functions, merged_image_name):
     merged_dag = DAG()
     # 添加新的融合函数节点
-    new_momory = original_dag.nodes[merged_functions[0]]["memory"]+original_dag.nodes[merged_functions[1]]["memory"]
-    if new_momory > 1024:
-        new_momory = 1024
+    # new_momory = original_dag.nodes[merged_functions[0]]["memory"]+original_dag.nodes[merged_functions[1]]["memory"]
+    # if new_momory > 1024:
+    #     new_momory = 1024
     merged_dag.add_node(merged_image_name, 
                         merged_image_name, 
                         original_dag.nodes[merged_functions[0]]["async"], 
                         original_dag.nodes[merged_functions[0]]["slo"],
-                        new_momory)
+                        original_dag.nodes[merged_functions[0]]["memory"])
     # 复制原始DAG中的所有节点和边到新的DAG中
     for node_id, node_info in original_dag.nodes.items():
         if node_id not in merged_functions:
@@ -159,10 +159,10 @@ def create_merged_dag(original_dag, merged_functions, merged_image_name):
                 merged_dag.add_edge(dep, node_id)
     return merged_dag
 
-def calculate_cost(container_total_time, container_memory):
+def calculate_cost(container_total_time, container_memory, num_calls):
     factor = 0.00001667
     # Lambda 0.00001667美元/GB-s
-    cost = factor * container_memory/1024 * container_total_time/1000
+    cost = factor * container_memory/1024 * container_total_time/1000 + 0.000002 * num_calls
     return cost
 
 def gradient_descent_optimization_for_dag(
@@ -188,7 +188,7 @@ def gradient_descent_optimization_for_dag(
     containers_runtime = {}
     # 保存初始化成本
     for node_id in dag.get_all_nodes():
-        cost = calculate_cost(dag.nodes[node_id]['total_time'], dag.nodes[node_id]['memory'])
+        cost = calculate_cost(dag.nodes[node_id]['total_time'], dag.nodes[node_id]['memory'], num_calls)
         containers_cost[node_id] = {dag.nodes[node_id]['memory']: cost}
         runtime = dag.nodes[node_id]['total_time']
         containers_runtime[node_id] = {dag.nodes[node_id]['memory']: runtime}
@@ -226,7 +226,7 @@ def gradient_descent_optimization_for_dag(
             update_dag_with_logs(dag, all_logs)
             for node_id in dag.get_all_nodes():
                 memory = dag.nodes[node_id]['memory']
-                containers_cost_left[node_id] = calculate_cost(dag.nodes[node_id]['total_time'], memory)
+                containers_cost_left[node_id] = calculate_cost(dag.nodes[node_id]['total_time'], memory, num_calls)
                 containers_runtime_left[node_id] = dag.nodes[node_id]['total_time']
                 containers_cost[node_id][memory] = containers_cost_left[node_id]
                 containers_runtime[node_id][memory] = containers_runtime_left[node_id]
@@ -260,7 +260,7 @@ def gradient_descent_optimization_for_dag(
             update_dag_with_logs(dag, all_logs)
             for node_id in dag.get_all_nodes():
                 memory = dag.nodes[node_id]['memory']
-                containers_cost_right[node_id] = calculate_cost(dag.nodes[node_id]['total_time'], memory)
+                containers_cost_right[node_id] = calculate_cost(dag.nodes[node_id]['total_time'], memory, num_calls)
                 containers_runtime_right[node_id] = dag.nodes[node_id]['total_time']
                 containers_cost[node_id][memory] = containers_cost_right[node_id]
                 containers_runtime[node_id][memory] = containers_runtime_right[node_id]
@@ -360,7 +360,7 @@ if __name__ == '__main__':
         entry_function_id = get_entry_function_id(dag)
         # 初始化调用入口函数num_calls次
         set_memory_limit_for_all_functions(dag)
-        all_logs = invoke_workflow_entry(entry_function_id, 20, f"workflow4_origin_{count}.pkl")
+        all_logs = invoke_workflow_entry(entry_function_id, 1, f"workflow4_origin_{count}.pkl")
         # 将日志信息加到DAG对应的函数下面
         update_dag_with_logs(dag, all_logs)
         # 找出同步调用时间最长的函数和调用它的函数
@@ -378,18 +378,16 @@ if __name__ == '__main__':
         entry_function_id = get_entry_function_id(merged_dag)
         # 调用入口函数num_calls次
         set_memory_limit_for_all_functions(merged_dag)
-        all_logs = invoke_workflow_entry(entry_function_id, 20, f"workflow4_merged_{count}.pkl")
+        all_logs = invoke_workflow_entry(entry_function_id, 1, f"workflow4_merged_{count}.pkl")
         # 将日志信息加到DAG对应的函数下面
         update_dag_with_logs(merged_dag, all_logs)
         # 比较端到端Cost是否下降
         before_cost = 0
         after_cost = 0
         for node_id, info in dag.nodes.items():
-            before_cost += calculate_cost(info["total_time"], info["memory"])
-            before_cost += 0.000025 # 每次状态转换0.000025USD
+            before_cost += calculate_cost(info["total_time"], info["memory"], num_calls=1)
         for node_id, info in merged_dag.nodes.items():
-            after_cost += calculate_cost(info["total_time"], info["memory"])
-            after_cost += 0.000025
+            after_cost += calculate_cost(info["total_time"], info["memory"], num_calls=1)
         if before_cost >= after_cost:
             dag = merged_dag
         else:
@@ -400,4 +398,4 @@ if __name__ == '__main__':
     
     # 对融合后的DAG内存做出修改
     gradient_descent_optimization_for_dag(dag, entry_function_id, memory_step=128, 
-    max_iterations=5, threshold_count=1, slo_runtime=None, num_calls=20)
+    max_iterations=5, threshold_count=1, slo_runtime=None, num_calls=1)
